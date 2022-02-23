@@ -1,0 +1,53 @@
+struct javel_eventStream {
+    response: http_response
+
+    sentHeader: bool = false
+
+    send(e reflectElement) bool {
+        if this.sentHeader == false {
+            this.response.setHeader("content-type", "text/event-stream")
+            this.response.write("\n\n")
+            this.response.send()
+            this.sentHeader = true
+        }
+        j = string(toJson(e))
+        j.replace("\n", " ")
+
+        return this.response.flush(strToArr("data: "+j.str()+"\n\n"))
+    }
+
+}
+
+struct javel_jsonForm {
+    request: http_request
+    response: http_response
+
+    form: jsonElement* = null
+
+    parseForm() bool {
+        if this.request.method != "POST" {
+            return false
+        }
+        ct = this.request.getHeader("content-type")
+        if ct != "application/json" {
+            return false
+        }
+        this.form = parseJson(this.request.body.str())
+            return this.form != null
+    }
+
+    scan(e reflectElement) {
+        if this.parseForm() == false {
+            return
+        }
+        this.form.scan(e)
+    }
+
+    send(e reflectElement) {
+        j = toJson(e)
+        this.response.setHeader("content-type", "application/json")
+        this.response.write(j)
+        this.response.send()
+    }
+
+}

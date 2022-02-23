@@ -1,0 +1,85 @@
+
+const JAVEL_BUFFER_SIZE = 4096
+
+javel_default_route_error(route javel_route*, code int, req http_request, resp http_response) {
+    resp.write("Error: "+intToStr(code) + " accessing '"+req.path+"' and unconfigured javel error for route '"+route.path+"'")
+    resp.code = code
+    resp.send()
+}
+
+javel_serveFile(route javel_route*, req http_request, resp http_response) {
+    fs = fileStream{}
+    p = route.base + "/" + javel_parsePath(req.path, resp)
+    fs.open(p, "r")
+    l = fs.getSize()
+
+    if isInside(route.base, p) == false || fs.isValid() == 0 {
+        fs.close()
+        if route.error != null {
+            route.error(404, req, resp)
+        } else {
+            javel_default_route_error(route, 404, req, resp)
+        }
+        return
+    }
+
+    r = []char
+    allocateArray(r, JAVEL_BUFFER_SIZE)
+
+
+    startStr = string(req.getHeader("range"))
+    start = 0
+
+    if startStr.length != 0 {
+        startStr.trimLeft(6)
+        startStr.trimRight(1)
+        start = strToInt(startStr.str())
+        resp.setHeader("accept-range", "bytes")
+        resp.setHeader("content-range", "bytes "+intToStr(start)+"-"+intToStr(l-1)+"/"+intToStr(l))
+        resp.code = HTTP_PARTIAL_CONTENT
+        fs.setPos(start)
+    }
+
+    resp.setHeader("content-length", intToStr(l - start))
+    resp.write("")
+    resp.send()
+    for fs.getPos() < l {
+        i=0; for i < JAVEL_BUFFER_SIZE && start+i < l {
+            r[i] = fs.getChar()
+            i = i + 1
+        }
+        start = start + i
+        if i < JAVEL_BUFFER_SIZE {
+            noCheck(r->length = i)
+        }
+        resp.flush(r)
+    }
+
+    fs.close()
+}
+
+javel_serveHTML(route javel_route*, req http_request, resp http_response) {
+    fs = fileStream{}
+    p = route.base + "/" + javel_parsePath(req.path, resp)
+    fs.open(p, "r")
+    l = fs.getSize()
+
+    if isInside(route.base, p) == false || fs.isValid() == 0 {
+        fs.close()
+        if route.error != null {
+            route.error(404, req, resp)
+        } else {
+            javel_default_route_error(route, 404, req, resp)
+        }
+        return
+    }
+
+    // resp.setHeader("content-length", intToStr(l))
+
+    cont = fs.readContent()
+
+    resp.write(__javel_js_runtime+cont)
+
+    fs.close()
+    resp.send()
+}

@@ -1,0 +1,34 @@
+const __javel_js_runtime = "
+<script>
+javel = {
+    load: (e, url, params)=>{
+        let elem
+        if (e instanceof HTMLElement) {
+            elem = e
+        } else {
+            elem = document.querySelector(e)
+        }
+        fetch(url, params).then(r=>{
+            r.text().then(t=>{
+                elem.innerHTML = t
+            })
+        })
+    },
+    onload: (callback)=> {
+        window.addEventListener('load', callback)
+    }
+};
+
+window.onload = ()=> {
+    javelModules = document.querySelectorAll(\"javel\")
+    for (i in javelModules) {
+        m = javelModules[i]
+        if (!(m instanceof HTMLElement)) {
+            continue
+        }
+        javel.load(m, m.getAttribute(\"src\"))
+    }
+}
+
+</script>
+"

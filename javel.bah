@@ -1,0 +1,138 @@
+#include "iostream.bah"
+#include "http.bah"
+#include "json.bah"
+#include "path.bah"
+#include "time.bah"
+
+
+struct javel_security {
+    timeout: int = 0
+
+    //in progress    
+    test(req http_request) bool {
+        return true
+    }
+}
+
+struct javel_route {
+    path: cpstring = ""
+    base: cpstring = ""
+    handle: function(javel_route*, http_request, http_response) = null
+    error: function(javel_route*, int, http_request, http_response) = null
+    security: javel_security
+
+    use(req http_request, resp http_response) {
+        if this.security.timeout > 0 {
+            if this.security.test(req) == false {
+                if this.error != null {
+                    this.error(400, req, resp)
+                } else {
+                    resp.write("Error: 400 accessing '"+req.path+"' and unconfigured javel error for route '"+this.path+"'.")
+                }
+                return
+            }
+        } else {
+            this.handle(req, resp)
+        }
+    }
+
+    match(path cpstring) int {
+        if path == this.path {
+            return strlen(this.path)
+        }
+        ps = string(path)
+        tps = string(this.path)
+        if tps.hasSuffix("/") && ps.hasPrefix(this.path) {
+            return strlen(this.path)
+        }
+        return 0
+    }
+
+}
+
+
+
+__javel_global_ptr = null
+
+#define __javel_handler(s http_server*, connfd int)
+
+struct javel {
+    s: http_server*
+    routes: []javel_route
+
+    port: int
+
+
+    launch() {
+        __javel_global_ptr = this
+
+        this.s = new http_server{
+            port: this.port
+        }
+        this.s.handle = __javel_handler
+        this.s.listenAndServe()
+
+    }
+
+}
+
+__javel_handler(s http_server*, connfd int) {
+    req = http_request(connfd)
+    resp = http_response(connfd)
+
+    jav javel* = __javel_global_ptr
+
+    bestRoute = javel_route{}
+    bestScore = 0
+
+    i=0; for i < len(jav.routes), i++ {
+        route = jav.routes[i]
+        score = route.match(req.path)
+        if score > bestScore {
+            bestScore = score
+            bestRoute = route
+        }
+    }
+
+    if bestRoute.handle != null {
+        bestRoute.use(req, resp)
+    } else {
+        resp.write("Error: unconfigured javel route.")
+        resp.send()
+    }
+
+}
+
+javel_parsePath(path cpstring, resp http_response) cpstring {
+    p = string(path)
+
+    if p.hasSuffix("/") {
+        p.append("index.html")
+    } else if p.count(".") == 0 {
+        p.append(".html")
+    }
+
+    if p.hasSuffix(".html") {
+        resp.setHeader("content-type", "text/html")        
+    } else if p.hasSuffix(".css") {
+        resp.setHeader("content-type", "text/stylesheet")        
+    } else if p.hasSuffix(".js") {
+        resp.setHeader("content-type", "text/javascript")        
+    } else if p.hasSuffix(".json") {
+        resp.setHeader("content-type", "application/json")        
+    } else if p.hasSuffix(".png") {
+        resp.setHeader("content-type", "image/png")        
+    } else if p.hasSuffix(".jpeg") {
+        resp.setHeader("content-type", "image/jpeg")        
+    } else if p.hasSuffix(".mov") {
+        resp.setHeader("content-type", "video/mov")        
+    } else if p.hasSuffix(".mp4") {
+        resp.setHeader("content-type", "video/mp4")        
+    }
+
+    return p.str()
+}
+
+#include "jsRuntime.bah"
+#include "defaultHandles.bah"
+#include "wrappers.bah"
