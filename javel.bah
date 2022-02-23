@@ -115,7 +115,7 @@ javel_parsePath(path cpstring, resp http_response) cpstring {
     if p.hasSuffix(".html") {
         resp.setHeader("content-type", "text/html")        
     } else if p.hasSuffix(".css") {
-        resp.setHeader("content-type", "text/stylesheet")        
+        resp.setHeader("content-type", "text/css")        
     } else if p.hasSuffix(".js") {
         resp.setHeader("content-type", "text/javascript")        
     } else if p.hasSuffix(".json") {
