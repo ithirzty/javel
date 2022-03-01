@@ -1,6 +1,6 @@
 #include "iostream.bah"
-#include "http.bah"
-#include "json.bah"
+#import "http.bah"
+#import "json.bah"
 #include "path.bah"
 #include "time.bah"
 
