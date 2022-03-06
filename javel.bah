@@ -19,6 +19,7 @@ struct javel_route {
     base: cpstring = ""
     handle: function(javel_route*, http_request, http_response) = null
     error: function(javel_route*, int, http_request, http_response) = null
+    events: function(javel_route*, cpstring, http_request, http_response) = null
     security: javel_security
 
     use(req http_request, resp http_response) {
@@ -76,6 +77,8 @@ struct javel {
 
 }
 
+#define __javel_internal_route(req http_request, resp http_response)
+
 __javel_handler(s http_server*, connfd int) {
     req = http_request(connfd)
     resp = http_response(connfd)
@@ -84,6 +87,11 @@ __javel_handler(s http_server*, connfd int) {
 
     bestRoute = javel_route{}
     bestScore = 0
+
+    if strHasPrefix(req.path, "/__javel/") {
+        __javel_internal_route(req, resp)
+        return
+    }
 
     i=0; for i < len(jav.routes), i++ {
         route = jav.routes[i]
@@ -136,3 +144,45 @@ javel_parsePath(path cpstring, resp http_response) cpstring {
 #include "jsRuntime.bah"
 #include "defaultHandles.bah"
 #include "wrappers.bah"
+
+__javel_internal_route(req http_request, resp http_response) {
+    if strHasPrefix(req.path, "/__javel/load/") {
+        evts = javel_eventStream{
+            response: resp
+        }
+
+        jav javel* = __javel_global_ptr
+        bestRoute = javel_route{}
+        bestScore = 0
+
+        p = string(req.path)
+        p.trimLeft(strlen("/__javel/load"))
+
+        i=0; for i < len(jav.routes), i++ {
+            route = jav.routes[i]
+            score = route.match(p.str())
+            if score > bestScore {
+                bestScore = score
+                bestRoute = route
+            }
+        }
+
+        if bestRoute.handle != null {
+            if bestRoute.handle == javel_serveFile || bestRoute.handle == javel_serveHTML {
+                fp = bestRoute.base + "/" + javel_parsePath(p.str(), resp)
+                lm = getLastModified(fp)
+                for 1 == 1 {
+                    if lm != getLastModified(fp) {
+                        evts.send("reload")
+                        lm = getLastModified(fp)
+                    }
+                }
+            } else {
+                if bestRoute.events != null {
+                    bestRoute.events(p.str(), req, resp)
+                }
+            }
+        }
+
+    }
+}

@@ -13,6 +13,16 @@ javel = {
                 elem.innerHTML = t
             })
         })
+        evt = new EventSource(\"/__javel/load/\"+url)
+        evt.onmessage = (d)=> {
+            if (JSON.parse(d.data) == \"reload\") {
+                fetch(url, params).then(r=>{
+                    r.text().then(t=>{
+                        elem.innerHTML = t
+                    })
+                })
+            }
+        }
     },
     onload: (callback)=> {
         window.addEventListener('load', callback)
