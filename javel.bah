@@ -19,7 +19,7 @@ struct javel_route {
     base: cpstring = ""
     handle: function(javel_route*, http_request, http_response) = null
     error: function(javel_route*, int, http_request, http_response) = null
-    events: function(javel_route*, cpstring, http_request, http_response) = null
+    events: function(javel_route*, cpstring, javel_eventStream, http_request, http_response) = null
     security: javel_security
 
     use(req http_request, resp http_response) {
@@ -167,7 +167,7 @@ __javel_internal_route(req http_request, resp http_response) {
             }
         }
 
-        if bestRoute.handle != null {
+        if bestRoute.handle == javel_serveHTML {
             if bestRoute.handle == javel_serveFile || bestRoute.handle == javel_serveHTML {
                 fp = bestRoute.base + "/" + javel_parsePath(p.str(), resp)
                 lm = getLastModified(fp)
@@ -179,7 +179,7 @@ __javel_internal_route(req http_request, resp http_response) {
                 }
             } else {
                 if bestRoute.events != null {
-                    bestRoute.events(p.str(), req, resp)
+                    bestRoute.events(p.str(), evts, req, resp)
                 }
             }
         }

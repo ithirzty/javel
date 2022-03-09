@@ -1,0 +1,34 @@
+#include "eval.bah"
+
+parseHTMLtemplate(s cpstring) cpstring {
+    nbBraces = 0
+    r = []char
+    i=0; for i < strlen(s), i++ {
+        c = s[i]
+        if i+1 < strlen(s) && c == '<' && s[i+1] == '%' {
+            i += 2
+            code = []char
+            for i < strlen(s), i++ {
+                if isSpace(s[i]) == 0 {
+                    break
+                }
+            }
+            for i < strlen(s), i++ {
+                if i+1 < strlen(s) && s[i] == '%' && s[i+1] == '>' {
+                    i++
+                    break
+                }
+                code[len(code)] = s[i]
+            }
+            code[len(code)] = <char>0
+            ret cpstring = evalRaw(arrAsStr(code))
+            j=0; for j < strlen(ret), j++ {
+                r[len(r)] = ret[j]
+            }
+            continue
+        }
+        r[len(r)] = c
+    }
+    r[len(r)] = <char>0
+    return arrAsStr(r)
+}
