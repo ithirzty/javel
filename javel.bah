@@ -19,7 +19,7 @@ struct javel_route {
     base: cpstring = ""
     handle: function(javel_route*, http_request, http_response) = null
     error: function(javel_route*, int, http_request, http_response) = null
-    events: function(javel_route*, cpstring, javel_eventStream, http_request, http_response) = null
+    events: function(javel_route*, cpstring, ptr, http_request, http_response) = null
     security: javel_security
 
     use(req http_request, resp http_response) {
@@ -147,7 +147,7 @@ javel_parsePath(path cpstring, resp http_response) cpstring {
 
 __javel_internal_route(req http_request, resp http_response) {
     if strHasPrefix(req.path, "/__javel/load/") {
-        evts = javel_eventStream{
+        evts = new javel_eventStream{
             response: resp
         }
 

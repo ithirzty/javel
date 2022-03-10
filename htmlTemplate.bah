@@ -1,5 +1,9 @@
 #include "eval.bah"
 
+__javel_getSyms() []reflectElement {
+    return __dumpSymbols()
+}
+
 parseHTMLtemplate(s cpstring) cpstring {
     nbBraces = 0
     r = []char
@@ -21,7 +25,7 @@ parseHTMLtemplate(s cpstring) cpstring {
                 code[len(code)] = s[i]
             }
             code[len(code)] = <char>0
-            ret cpstring = evalRaw(arrAsStr(code))
+            ret cpstring = evalRaw(arrAsStr(code), __javel_getSyms())
             j=0; for j < strlen(ret), j++ {
                 r[len(r)] = ret[j]
             }
