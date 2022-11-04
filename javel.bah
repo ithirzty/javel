@@ -1,8 +1,9 @@
-#include "iostream.bah"
-#include "http.bah"
-#include "json.bah"
-#include "path.bah"
-#include "time.bah"
+#import "iostream.bah"
+#import "http.bah"
+#import "json.bah"
+#import "path.bah"
+#import "time.bah"
+// #include "javelWasm.bah"
 
 
 struct javel_security {
@@ -85,6 +86,10 @@ __javel_handler(s http_server*, connfd int) {
 
     jav javel* = __javel_global_ptr
 
+    if jav == null {
+        return
+    }
+
     bestRoute = javel_route{}
     bestScore = 0
 
@@ -136,6 +141,8 @@ javel_parsePath(path cpstring, resp http_response) cpstring {
         resp.setHeader("content-type", "video/mov")        
     } else if p.hasSuffix(".mp4") {
         resp.setHeader("content-type", "video/mp4")        
+    } else if p.hasSuffix(".wasm") {
+        resp.setHeader("content-type", "application/wasm")        
     }
 
     return p.str()
@@ -152,6 +159,11 @@ __javel_internal_route(req http_request, resp http_response) {
         }
 
         jav javel* = __javel_global_ptr
+        
+        if jav == null {
+            return
+        }
+        
         bestRoute = javel_route{}
         bestScore = 0
 

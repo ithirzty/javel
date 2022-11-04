@@ -1,4 +1,4 @@
-#include "eval.bah"
+#import "eval.bah"
 
 __javel_getSyms() []reflectElement {
     return __dumpSymbols()
@@ -6,33 +6,31 @@ __javel_getSyms() []reflectElement {
 
 parseHTMLtemplate(s cpstring) cpstring {
     nbBraces = 0
-    r = []char
-    i=0; for i < strlen(s), i++ {
+    r = strBuilder{}
+    i=0; for i < len(s), i++ {
         c = s[i]
-        if i+1 < strlen(s) && c == '<' && s[i+1] == '%' {
+        if i+1 < len(s) && c == '<' && s[i+1] == '%' {
             i += 2
-            code = []char
-            for i < strlen(s), i++ {
-                if isSpace(s[i]) == 0 {
+            code = strBuilder{}
+            for i < len(s), i++ {
+                if isSpace(s[i]) == false {
                     break
                 }
             }
-            for i < strlen(s), i++ {
-                if i+1 < strlen(s) && s[i] == '%' && s[i+1] == '>' {
+            for i < len(s), i++ {
+                if i+1 < len(s) && s[i] == '%' && s[i+1] == '>' {
                     i++
                     break
                 }
-                code[len(code)] = s[i]
+                code.append(s[i])
             }
-            code[len(code)] = <char>0
-            ret cpstring = evalRaw(arrAsStr(code), __javel_getSyms())
+            ret cpstring = evalRaw(code.str(), __javel_getSyms())
             j=0; for j < strlen(ret), j++ {
-                r[len(r)] = ret[j]
+                r.append(ret[j])
             }
             continue
         }
-        r[len(r)] = c
+        r.append(c)
     }
-    r[len(r)] = <char>0
-    return arrAsStr(r)
+    return r.str()
 }

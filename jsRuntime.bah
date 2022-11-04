@@ -40,5 +40,16 @@ window.onload = ()=> {
     }
 }
 
+let bah = {
+    call: (name, args) => {
+        types = []
+        for (i in args) {
+            a = args[i]
+            types[i] = typeof a
+        }
+        Module.ccall(name, \"\", types, args)
+    }
+}
+
 </script>
 "
