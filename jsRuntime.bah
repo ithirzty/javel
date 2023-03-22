@@ -1,55 +1,55 @@
-const __javel_js_runtime = "
-<script>
-javel = {
-    load: (e, url, params)=>{
-        let elem
-        if (e instanceof HTMLElement) {
-            elem = e
-        } else {
-            elem = document.querySelector(e)
-        }
-        fetch(url, params).then(r=>{
-            r.text().then(t=>{
-                elem.innerHTML = t
-            })
-        })
-        evt = new EventSource(\"/__javel/load/\"+url)
-        evt.onmessage = (d)=> {
-            if (JSON.parse(d.data) == \"reload\") {
-                fetch(url, params).then(r=>{
-                    r.text().then(t=>{
-                        elem.innerHTML = t
-                    })
-                })
-            }
-        }
-    },
-    onload: (callback)=> {
-        window.addEventListener('load', callback)
-    }
-};
+// const __javel_js_runtime = "
+// <script>
+// javel = {
+//     load: (e, url, params)=>{
+//         let elem
+//         if (e instanceof HTMLElement) {
+//             elem = e
+//         } else {
+//             elem = document.querySelector(e)
+//         }
+//         fetch(url, params).then(r=>{
+//             r.text().then(t=>{
+//                 elem.innerHTML = t
+//             })
+//         })
+//         evt = new EventSource(\"/__javel/load/\"+url)
+//         evt.onmessage = (d)=> {
+//             if (JSON.parse(d.data) == \"reload\") {
+//                 fetch(url, params).then(r=>{
+//                     r.text().then(t=>{
+//                         elem.innerHTML = t
+//                     })
+//                 })
+//             }
+//         }
+//     },
+//     onload: (callback)=> {
+//         window.addEventListener('load', callback)
+//     }
+// };
 
-window.onload = ()=> {
-    javelModules = document.querySelectorAll(\"javel\")
-    for (i in javelModules) {
-        m = javelModules[i]
-        if (!(m instanceof HTMLElement)) {
-            continue
-        }
-        javel.load(m, m.getAttribute(\"src\"))
-    }
-}
+// window.onload = ()=> {
+//     javelModules = document.querySelectorAll(\"javel\")
+//     for (i in javelModules) {
+//         m = javelModules[i]
+//         if (!(m instanceof HTMLElement)) {
+//             continue
+//         }
+//         javel.load(m, m.getAttribute(\"src\"))
+//     }
+// }
 
-let bah = {
-    call: (name, args) => {
-        types = []
-        for (i in args) {
-            a = args[i]
-            types[i] = typeof a
-        }
-        Module.ccall(name, \"\", types, args)
-    }
-}
+// let bah = {
+//     call: (name, args) => {
+//         types = []
+//         for (i in args) {
+//             a = args[i]
+//             types[i] = typeof a
+//         }
+//         Module.ccall(name, \"\", types, args)
+//     }
+// }
 
-</script>
-"
+// </script>
+// "
