@@ -148,7 +148,7 @@ javel_parsePath(path cpstring, resp http_response) cpstring {
     return p.str()
 }
 
-#include "jsRuntime.bah"
+// #include "jsRuntime.bah"
 #include "defaultHandles.bah"
 #include "wrappers.bah"
 
