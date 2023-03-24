@@ -61,6 +61,7 @@ __javel_global_ptr = null
 struct javel {
     s: http_server*
     routes: []javel_route
+    requestsMaxSize: int = -1
 
     port: int
 
@@ -81,14 +82,22 @@ struct javel {
 #define __javel_internal_route(req http_request, resp http_response)
 
 __javel_handler(s http_server*, connfd int) {
-    req = http_request(connfd)
-    resp = http_response(connfd)
 
     jav javel* = __javel_global_ptr
-
     if jav == null {
         return
     }
+    
+    req http_request
+
+    if jav.requestsMaxSize != -1 {
+        req = http_requestSizeLimited(connfd, jav.requestsMaxSize)
+    } else {
+        req = http_request(connfd)
+    }
+    resp = http_response(connfd)
+
+
 
     bestRoute = javel_route{}
     bestScore = 0

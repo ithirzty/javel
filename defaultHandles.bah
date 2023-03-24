@@ -149,7 +149,6 @@ javel_serveHTML(route javel_route*, req http_request, resp http_response) {
         return
     }
 
-    // resp.setHeader("content-length", intToStr(l))
     resp.write(parseHTMLtemplate(fs.readContent()))
 
 
